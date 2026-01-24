@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚽ مهارة 01 - أقوى فريق في الجزائر</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- شاشة التحميل -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-content">
+            <div class="football-animation">⚽</div>
+            <h2 class="loading-text">جاري التحميل...</h2>
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- الإشعارات -->
+    <div id="notification" class="notification hidden"></div>
+
+    <!-- الهيدر -->
+    <header class="header">
+        <div class="container header-content">
+            <div class="logo-section">
+                <div class="football-icon">⚽</div>
+                <div class="team-info">
+                    <h1 class="team-name">مهارة 01</h1>
+                    <p class="team-slogan">🔥 فخر الجزائر</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <span id="save-status" class="save-status"></span>
+                <button id="admin-btn" class="admin-btn">
+                    🔐 دخول المدير
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- نافذة تسجيل الدخول -->
+    <div id="login-modal" class="modal hidden">
+        <div class="modal-content login-modal">
+            <div class="modal-header">
+                <h3>🛡️ دخول المدير</h3>
+                <button class="close-modal" onclick="closeLoginModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="login-username" placeholder="اسم المستخدم" class="input-field">
+                <div class="password-field">
+                    <input type="password" id="login-password" placeholder="كلمة المرور" class="input-field">
+                    <button class="toggle-password" onclick="togglePassword()">👁️</button>
+                </div>
+                <div class="modal-actions">
+                    <button onclick="handleLogin()" class="btn btn-primary">دخول</button>
+                    <button onclick="closeLoginModal()" class="btn btn-secondary">إلغاء</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- القائمة الرئيسية -->
+    <nav class="main-nav">
+        <div class="container">
+            <button onclick="showPage('field')" class="nav-btn active" data-page="field">
+                ⚽ الملعب
+            </button>
+            <button onclick="showPage('stats')" class="nav-btn" data-page="stats">
+                📊 الإحصائيات
+            </button>
+            <button onclick="showPage('matches')" class="nav-btn" data-page="matches">
+                📅 المباريات
+            </button>
+            <button onclick="showPage('achievements')" class="nav-btn" data-page="achievements">
+                🏆 الإنجازات
+            </button>
+            <button onclick="showPage('ratings')" class="nav-btn" data-page="ratings">
+                ⭐ التقييمات
+            </button>
+        </div>
+    </nav>
+
+    <!-- المحتوى الرئيسي -->
+    <main class="main-content">
+        <div class="container">
+
+            <!-- صفحة الملعب -->
+            <div id="page-field" class="page active">
+                <div class="page-header">
+                    <h2 class="page-title">⚽ ملعب مهارة 01</h2>
+                    <p class="page-subtitle">البرنابيو - فخر الجزائر</p>
+                </div>
+
+                <!-- لوحة إضافة لاعب (للمدير فقط) -->
+                <div id="add-player-panel" class="admin-panel hidden">
+                    <h3 class="panel-title">👥 إضافة لاعب جديد</h3>
+                    <div class="form-grid">
+                        <input type="text" id="player-name" placeholder="الاسم" class="input-field">
+                        <input type="number" id="player-number" placeholder="الرقم" class="input-field">
+                        <input type="text" id="player-position" placeholder="المركز" class="input-field">
+                        <input type="text" id="player-emoji" placeholder="Emoji ⚽" class="input-field emoji-input">
+                    </div>
+                    <div class="rating-slider">
+                        <label>التقييم: <span id="rating-value">85</span></label>
+                        <input type="range" id="player-rating" min="50" max="99" value="85" class="slider">
+                    </div>
+                    <div class="form-actions">
+                        <input type="file" id="player-image" accept="image/*" class="hidden">
+                        <label for="player-image" class="btn btn-upload">
+                            📤 اختر صورة
+                        </label>
+                        <span id="image-status" class="image-status"></span>
+                        <select id="formation-select" class="select-field">
+                            <option value="4-3-3">4-3-3</option>
+                            <option value="4-4-2">4-4-2</option>
+                            <option value="3-5-2">3-5-2</option>
+                            <option value="4-2-3-1">4-2-3-1</option>
+                        </select>
+                        <button onclick="addPlayer()" class="btn btn-primary">إضافة اللاعب</button>
+                    </div>
+                </div>
+
+                <!-- الملعب -->
+                <div class="field-container">
+                    <canvas id="football-field" width="1000" height="700"></canvas>
+                </div>
+
+                <!-- لاعبو الاحتياط -->
+                <div id="reserve-players" class="reserve-section"></div>
+
+                <!-- إدارة اللاعبين الأساسيين (للمدير فقط) -->
+                <div id="main-players-management" class="admin-panel hidden"></div>
+            </div>
+
+            <!-- صفحة الإحصائيات -->
+            <div id="page-stats" class="page">
+                <div class="page-header">
+                    <h2 class="page-title">📊 إحصائيات الفريق</h2>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card wins">
+                        <div class="stat-icon">🏆</div>
+                        <div class="stat-info">
+                            <h3 class="stat-value" id="stat-wins">0</h3>
+                            <p class="stat-label">انتصارات</p>
+                        </div>
+                    </div>
+                    <div class="stat-card draws">
+                        <div class="stat-icon">🤝</div>
+                        <div class="stat-info">
+                            <h3 class="stat-value" id="stat-draws">0</h3>
+                            <p class="stat-label">تعادلات</p>
+                        </div>
+                    </div>
+                    <div class="stat-card losses">
+                        <div class="stat-icon">😔</div>
+                        <div class="stat-info">
+                            <h3 class="stat-value" id="stat-losses">0</h3>
+                            <p class="stat-label">خسائر</p>
+                        </div>
+                    </div>
+                    <div class="stat-card goals-scored">
+                        <div class="stat-icon">⚽</div>
+                        <div class="stat-info">
+                            <h3 class="stat-value" id="stat-goals-scored">0</h3>
+                            <p class="stat-label">أهداف مسجلة</p>
+                        </div>
+                    </div>
+                    <div class="stat-card goals-conceded">
+                        <div class="stat-icon">🥅</div>
+                        <div class="stat-info">
+                            <h3 class="stat-value" id="stat-goals-conceded">0</h3>
+                            <p class="stat-label">أهداف مستقبلة</p>
+                        </div>
+                    </div>
+                    <div class="stat-card win-rate">
+                        <div class="stat-icon">📈</div>
+                        <div class="stat-info">
+                            <h3 class="stat-value" id="stat-win-rate">0%</h3>
+                            <p class="stat-label">نسبة الفوز</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- زر تعديل الإحصائيات (للمدير فقط) -->
+                <div id="edit-stats-panel" class="admin-panel hidden">
+                    <h3 class="panel-title">✏️ تعديل الإحصائيات</h3>
+                    <div class="form-grid">
+                        <input type="number" id="edit-wins" placeholder="الانتصارات" class="input-field">
+                        <input type="number" id="edit-draws" placeholder="التعادلات" class="input-field">
+                        <input type="number" id="edit-losses" placeholder="الخسائر" class="input-field">
+                        <input type="number" id="edit-goals-scored" placeholder="الأهداف المسجلة" class="input-field">
+                        <input type="number" id="edit-goals-conceded" placeholder="الأهداف المستقبلة" class="input-field">
+                    </div>
+                    <button onclick="updateStatsData()" class="btn btn-primary">حفظ التعديلات</button>
+                </div>
+
+                <!-- أفضل اللاعبين -->
+                <div class="top-players">
+                    <h3 class="section-title">🌟 أفضل اللاعبين</h3>
+                    <div id="top-players-list" class="top-players-grid"></div>
+                </div>
+            </div>
+
+            <!-- صفحة المباريات -->
+            <div id="page-matches" class="page">
+                <div class="page-header">
+                    <h2 class="page-title">📅 المباريات</h2>
+                </div>
+
+                <!-- زر إضافة مباراة (للمدير فقط) -->
+                <div id="add-match-btn-container" class="admin-panel hidden">
+                    <button onclick="openAddMatchModal()" class="btn btn-primary">➕ إضافة مباراة</button>
+                </div>
+
+                <!-- المباريات القادمة -->
+                <div class="matches-section">
+                    <h3 class="section-title">⏱️ المباريات القادمة</h3>
+                    <div id="upcoming-matches" class="matches-grid"></div>
+                </div>
+
+                <!-- المباريات السابقة -->
+                <div class="matches-section">
+                    <h3 class="section-title">📜 المباريات السابقة</h3>
+                    <div id="past-matches" class="matches-grid"></div>
+                </div>
+            </div>
+
+            <!-- صفحة الإنجازات -->
+            <div id="page-achievements" class="page">
+                <div class="page-header">
+                    <h2 class="page-title">🏆 الإنجازات</h2>
+                </div>
+
+                <!-- زر إضافة إنجاز (للمدير فقط) -->
+                <div id="add-achievement-btn-container" class="admin-panel hidden">
+                    <button onclick="openAddAchievementModal()" class="btn btn-primary">➕ إضافة إنجاز</button>
+                </div>
+
+                <div id="achievements-grid" class="achievements-grid"></div>
+            </div>
+
+            <!-- صفحة التقييمات -->
+            <div id="page-ratings" class="page">
+                <div class="page-header">
+                    <h2 class="page-title">⭐ تقييم اللاعبين</h2>
+                    <p class="page-subtitle">صوت للاعبك المفضل</p>
+                </div>
+                <div id="players-ratings" class="ratings-grid"></div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- نافذة إضافة مباراة -->
+    <div id="match-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>⚽ إضافة مباراة</h3>
+                <button class="close-modal" onclick="closeMatchModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="match-opponent" placeholder="الفريق الخصم" class="input-field">
+                <input type="date" id="match-date" class="input-field">
+                <input type="time" id="match-time" class="input-field">
+                <input type="text" id="match-stadium" placeholder="الملعب" class="input-field">
+                <select id="match-competition" class="select-field">
+                    <option value="">نوع البطولة</option>
+                    <option value="الدوري">الدوري</option>
+                    <option value="كأس الجزائر">كأس الجزائر</option>
+                    <option value="دوري أبطال أفريقيا">دوري أبطال أفريقيا</option>
+                    <option value="ودية">ودية</option>
+                </select>
+                <div class="modal-actions">
+                    <button onclick="addMatch()" class="btn btn-primary">إضافة</button>
+                    <button onclick="closeMatchModal()" class="btn btn-secondary">إلغاء</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة إضافة إنجاز -->
+    <div id="achievement-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🏆 إضافة إنجاز</h3>
+                <button class="close-modal" onclick="closeAchievementModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="achievement-title" placeholder="اسم الإنجاز" class="input-field">
+                <input type="number" id="achievement-year" placeholder="السنة" class="input-field">
+                <select id="achievement-type" class="select-field">
+                    <option value="">نوع الإنجاز</option>
+                    <option value="🏆">🏆 بطولة</option>
+                    <option value="🥇">🥇 ميدالية ذهبية</option>
+                    <option value="🥈">🥈 ميدالية فضية</option>
+                    <option value="🥉">🥉 ميدالية برونزية</option>
+                    <option value="⭐">⭐ نجمة</option>
+                    <option value="🎖️">🎖️ وسام</option>
+                </select>
+                <div class="modal-actions">
+                    <button onclick="addAchievement()" class="btn btn-primary">إضافة</button>
+                    <button onclick="closeAchievementModal()" class="btn btn-secondary">إلغاء</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة منح ميدالية -->
+    <div id="medal-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🏅 منح ميدالية</h3>
+                <button class="close-modal" onclick="closeMedalModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div id="medals-list" class="medals-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- الفوتر -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-icon">⚽🏆</div>
+                <h3 class="footer-title">فوت بال مهارة 01</h3>
+                <p class="footer-slogan">🔥 أقوى فريق في الجزائر</p>
+                <div class="footer-stats">
+                    <span>👥 <span id="footer-players-count">0</span> لاعب</span>
+                    <span>🏆 <span id="footer-achievements-count">0</span> إنجاز</span>
+                    <span>⚽ <span id="footer-matches-count">0</span> مباراة</span>
+                </div>
+                <p class="footer-copyright">© 2026 مهارة 01 - جميع الحقوق محفوظة</p>
+                <p class="footer-love">❤️ تم التطوير بحب للفريق</p>
+            </div>
+        </div>
+    </footer>
+    <script src="storage.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
